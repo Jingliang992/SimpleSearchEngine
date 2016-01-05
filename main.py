@@ -140,17 +140,59 @@ crawl_web("http://cuda.io")
 def crawl_web(seed, max_page, domain):
     to_crawl = {seed}
     crawled = set()
+    graph = {}  # <url>, [list of pages it links to]
     index = {}                   
     while to_crawl:
         url = to_crawl.pop()
         if url not in crawled:
             content = get_page(url)           
             add_page_to_index(index, url, content) 
-
-            to_crawl = to_crawl.union(get_all_links(content, domain))
+            outlinks = get_all_links(content, domain)
+            graph[url] = outlinks
+            to_crawl = to_crawl.union(outlinks)
             crawled.add(url)
             if len(crawled)>=max_page:
                 break            
-    return index
+    return index, graph
             
-print crawl_web("http://nus.edu.sg", 20, "nus.edu")    
+ 
+
+def lookup(index, keyword):
+    if keyword in index:
+            return index[keyword]
+    return None 
+
+"""
+def popularity(t,p):
+    if t == 0:  # base case, at time step 0
+        return 1 # the score is always 1 
+    else:
+        score = 0
+        for f in friends(p): # summing over the friends
+            score = score + popularity(t-1,f) # adding the popularity at the time step before
+        return score
+"""
+
+def compute_ranks(graph):
+    d = 0.8 # damping factor
+    numloops = 100 
+
+    ranks = {}
+    npages = len(graph)
+    for page in graph:
+        ranks[page] = 1.0 / npages
+
+    for i in range(0, numloops):
+        newranks = {}
+        for page in graph:
+            newrank = (1 - d) / npages
+            for node in graph:
+                if page in graph[node]:
+                    newrank = newrank +d * (ranks[node] / len(graph[node]))
+                    
+            newranks[page] = newrank
+        ranks = newranks
+    return ranks
+    
+index, graph = crawl_web("http://nus.edu.sg", 20, "nus.edu")  
+ranks = compute_ranks(graph)
