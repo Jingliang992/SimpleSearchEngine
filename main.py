@@ -74,16 +74,17 @@ def compute_ranks(graph):
         ranks = newranks
     return ranks
     
-def print_links_in_relevance(seed, max_page, domain):
+def print_links_in_relevance(seed, topN, domain):
     graph = {}  # <url>, [list of pages it links to]
     index = {}
     ranks = {}
+    max_page = 20 
     index, graph = crawl_web(seed, max_page, domain)
     ranks = compute_ranks(graph)
-    print list(reversed(sorted(ranks)))
+    print list(reversed(sorted(ranks)))[0:topN]
      
 #test    
-print_links_in_relevance("http://nus.edu.sg", 20, "nus.edu")  
+print_links_in_relevance("http://nus.edu.sg", 10, "nus.edu")  
 
 
 
