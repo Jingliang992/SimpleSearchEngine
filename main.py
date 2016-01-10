@@ -68,23 +68,41 @@ def compute_ranks(graph):
             newrank = (1 - d) / npages
             for node in graph:
                 if page in graph[node]:
-                    newrank = newrank +d * (ranks[node] / len(graph[node]))
+                    newrank = newrank + d * (ranks[node] / len(graph[node]))
                     
             newranks[page] = newrank
         ranks = newranks
     return ranks
     
-def print_links_in_relevance(seed, topN, domain):
+def search(keyword, index):
+    if keyword in index:
+        return index[keyword]
+    else:
+        return []
+
+def getKey(item):
+    return item[1]
+    
+def main(seed, max_page, domain):
     graph = {}  # <url>, [list of pages it links to]
     index = {}
     ranks = {}
-    max_page = 20 
     index, graph = crawl_web(seed, max_page, domain)
+    print index
     ranks = compute_ranks(graph)
-    print list(reversed(sorted(ranks)))[0:topN]
-     
-#test    
+    while True:
+        l_tuple = []
+        keyword = input("Please input your keyword:")
+        topN = input("Please input # of the pages you want:")
+        urls = search(keyword, index)
+        for url in urls:
+            l_tuple.append((url, ranks[url]))
+        print sorted(l_tuple, key = getKey, reverse = True)[0 : topN]
+
+
+"""
 print_links_in_relevance("http://nus.edu.sg", 10, "nus.edu")  
 
-
-
+ranks = compute_ranks(graph)
+"""
+main("http://www.yoursingapore.com/en.html", 100, "yoursingapore.com")
